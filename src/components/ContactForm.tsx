@@ -262,7 +262,6 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('phone')}
               onBlur={handleBlur}
-              placeholder="(DD) 9 XXXX-XXXX"
               className={`w-full bg-black/70 border ${
                 errors.phone ? 'border-red-500' : 'border-gray-700'
               } rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white`}
