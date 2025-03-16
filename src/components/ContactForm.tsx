@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Send, User, Mail, Phone, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -10,6 +9,20 @@ interface FormData {
   subject: string;
 }
 
+const VALID_EMAIL_DOMAINS = [
+  'gmail.com',
+  'outlook.com',
+  'hotmail.com',
+  'yahoo.com',
+  'icloud.com',
+  'protonmail.com',
+  'aol.com',
+  'mail.com',
+  'zoho.com',
+  'live.com',
+  'msn.com'
+];
+
 const ContactForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -20,13 +33,72 @@ const ContactForm: React.FC = () => {
   
   const [submitting, setSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState<keyof FormData | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   
-  // You can configure this URL later in the code
   const GOOGLE_SHEETS_URL = ""; // TODO: Add your Google Sheets URL here
+
+  const validateEmail = (email: string) => {
+    if (!email) return "Email is required";
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Invalid email format";
+    
+    const domain = email.split('@')[1];
+    if (!VALID_EMAIL_DOMAINS.includes(domain)) {
+      return `Only emails from these domains are accepted: ${VALID_EMAIL_DOMAINS.join(', ')}`;
+    }
+    
+    return "";
+  };
+
+  const validatePhone = (phone: string) => {
+    if (!phone) return "Phone number is required";
+    
+    const numericPhone = phone.replace(/\D/g, '');
+    
+    if (numericPhone.length !== 11) {
+      return "Phone must have 11 digits: (DD) 9 XXXX-XXXX";
+    }
+    
+    return "";
+  };
+
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.length <= 2) {
+      return `(${numbers}`;
+    } else if (numbers.length <= 3) {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    } else if (numbers.length <= 7) {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 3)} ${numbers.slice(3)}`;
+    } else {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 3)} ${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'phone') {
+      const rawValue = value.replace(/\D/g, '');
+      const trimmed = rawValue.slice(0, 11);
+      const formatted = formatPhoneNumber(trimmed);
+      
+      setFormData(prev => ({ ...prev, [name]: formatted }));
+      
+      const phoneError = validatePhone(trimmed);
+      setErrors(prev => ({ ...prev, [name]: phoneError }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      
+      if (name === 'email') {
+        const emailError = validateEmail(value);
+        setErrors(prev => ({ ...prev, [name]: emailError }));
+      } else {
+        setErrors(prev => ({ ...prev, [name]: value ? "" : `${name} is required` }));
+      }
+    }
   };
 
   const handleFocus = (field: keyof FormData) => {
@@ -37,8 +109,34 @@ const ContactForm: React.FC = () => {
     setFocusedField(null);
   };
 
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+    
+    if (!formData.name) newErrors.name = "Name is required";
+    
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+    
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) newErrors.phone = phoneError;
+    
+    if (!formData.subject) newErrors.subject = "Subject is required";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please correct the errors in the form",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!GOOGLE_SHEETS_URL) {
       console.log("Google Sheets URL not configured");
@@ -61,7 +159,6 @@ const ContactForm: React.FC = () => {
         body: JSON.stringify(formData),
       });
       
-      // Since we're using no-cors mode, we can't actually check the response status
       toast({
         title: "Form submitted successfully",
         description: "Your data has been sent!",
@@ -73,6 +170,8 @@ const ContactForm: React.FC = () => {
         phone: '',
         subject: '',
       });
+      
+      setErrors({});
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -107,9 +206,14 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('name')}
               onBlur={handleBlur}
-              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white"
+              className={`w-full bg-black/70 border ${
+                errors.name ? 'border-red-500' : 'border-gray-700'
+              } rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white`}
               required
             />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+            )}
           </div>
           
           <div className="relative">
@@ -130,9 +234,14 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('email')}
               onBlur={handleBlur}
-              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white"
+              className={`w-full bg-black/70 border ${
+                errors.email ? 'border-red-500' : 'border-gray-700'
+              } rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white`}
               required
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
           
           <div className="relative">
@@ -153,9 +262,15 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('phone')}
               onBlur={handleBlur}
-              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white"
+              placeholder="(DD) 9 XXXX-XXXX"
+              className={`w-full bg-black/70 border ${
+                errors.phone ? 'border-red-500' : 'border-gray-700'
+              } rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white`}
               required
             />
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
           </div>
           
           <div className="relative">
@@ -175,9 +290,14 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('subject')}
               onBlur={handleBlur}
-              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 min-h-[120px] resize-none pt-4 outline-none focus:border-blue-400 transition-all duration-300 text-white"
+              className={`w-full bg-black/70 border ${
+                errors.subject ? 'border-red-500' : 'border-gray-700'
+              } rounded-md px-4 py-3 min-h-[120px] resize-none pt-4 outline-none focus:border-blue-400 transition-all duration-300 text-white`}
               required
             />
+            {errors.subject && (
+              <p className="text-red-500 text-xs mt-1">{errors.subject}</p>
+            )}
           </div>
           
           <button
