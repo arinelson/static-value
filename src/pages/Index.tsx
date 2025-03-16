@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import ContactForm from '@/components/ContactForm';
+import ParticleBackground from '@/components/ParticleBackground';
 
 const Index: React.FC = () => {
   useEffect(() => {
@@ -12,7 +13,10 @@ const Index: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center px-4 py-20 relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center px-4 py-20 relative overflow-hidden bg-gradient-to-b from-[#0A192F] via-[#112240] to-[#1A365D]">
+      {/* Particle Background */}
+      <ParticleBackground />
+      
       {/* Form Container */}
       <ContactForm />
       
