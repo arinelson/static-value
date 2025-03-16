@@ -1,28 +1,14 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import ContactForm from '@/components/ContactForm';
 import ParticleBackground from '@/components/ParticleBackground';
-import HolographicEffect from '@/components/HolographicEffect';
 
 const Index: React.FC = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [animationComplete, setAnimationComplete] = useState(false);
-
   useEffect(() => {
-    // Start the animation sequence
-    setTimeout(() => {
-      setShowForm(true);
-    }, 1000);
-    
-    // Mark animation as complete after the total duration
-    setTimeout(() => {
-      setAnimationComplete(true);
-    }, 3000);
-
     // Add staggered fade-in effect to elements
     const elements = document.querySelectorAll('.stagger-fade-in');
     elements.forEach((el, index) => {
-      (el as HTMLElement).style.animationDelay = `${index * 0.1 + 3.2}s`;
+      (el as HTMLElement).style.animationDelay = `${index * 0.1 + 0.2}s`;
     });
   }, []);
 
@@ -31,18 +17,11 @@ const Index: React.FC = () => {
       {/* Particle Background */}
       <ParticleBackground />
       
-      {/* Holographic Animation */}
-      <HolographicEffect />
-      
-      {/* Form Container with Animation */}
-      <div className={`relative ${showForm ? 'form-reveal' : 'form-hidden'}`}>
-        <div className={`pointer-events-${animationComplete ? 'auto' : 'none'}`}>
-          <ContactForm />
-        </div>
-      </div>
+      {/* Form Container */}
+      <ContactForm />
       
       {/* Footer */}
-      <div className="absolute bottom-8 text-white/40 text-sm animate-fade-in opacity-0" style={{ animationDelay: '3.5s' }}>
+      <div className="absolute bottom-8 text-white/40 text-sm animate-fade-in opacity-0" style={{ animationDelay: '1s' }}>
         © {new Date().getFullYear()} · Designed with precision
       </div>
     </div>
