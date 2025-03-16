@@ -190,10 +190,10 @@ const ContactForm: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative">
             <label 
-              className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
+              className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'name' || formData.name 
                   ? 'text-xs -top-6 text-blue-400' 
-                  : 'text-gray-400'
+                  : 'text-gray-400 top-3'
               }`}
             >
               <User size={16} /> 
@@ -218,10 +218,10 @@ const ContactForm: React.FC = () => {
           
           <div className="relative">
             <label 
-              className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
+              className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'email' || formData.email 
                   ? 'text-xs -top-6 text-blue-400' 
-                  : 'text-gray-400'
+                  : 'text-gray-400 top-3'
               }`}
             >
               <Mail size={16} /> 
@@ -246,10 +246,10 @@ const ContactForm: React.FC = () => {
           
           <div className="relative">
             <label 
-              className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
+              className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'phone' || formData.phone 
                   ? 'text-xs -top-6 text-blue-400' 
-                  : 'text-gray-400'
+                  : 'text-gray-400 top-3'
               }`}
             >
               <Phone size={16} /> 
@@ -274,10 +274,10 @@ const ContactForm: React.FC = () => {
           
           <div className="relative">
             <label 
-              className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
+              className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'subject' || formData.subject 
                   ? 'text-xs -top-6 text-blue-400' 
-                  : 'text-gray-400'
+                  : 'text-gray-400 top-3'
               }`}
             >
               <FileText size={16} /> 
