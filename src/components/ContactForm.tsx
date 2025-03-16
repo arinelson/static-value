@@ -87,14 +87,14 @@ const ContactForm: React.FC = () => {
 
   return (
     <div className="w-full max-w-lg mx-auto animate-fade-in-up">
-      <div className="glass-panel rounded-xl p-8 subtle-glow">
+      <div className="bg-black/90 rounded-xl p-8 shadow-xl border border-gray-800">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative">
             <label 
               className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'name' || formData.name 
-                  ? 'text-xs -top-6 text-tech-blue' 
-                  : 'text-tech-light/60'
+                  ? 'text-xs -top-6 text-blue-400' 
+                  : 'text-gray-400'
               }`}
             >
               <User size={16} /> 
@@ -107,7 +107,7 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('name')}
               onBlur={handleBlur}
-              className="form-input"
+              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white"
               required
             />
           </div>
@@ -116,8 +116,8 @@ const ContactForm: React.FC = () => {
             <label 
               className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'email' || formData.email 
-                  ? 'text-xs -top-6 text-tech-blue' 
-                  : 'text-tech-light/60'
+                  ? 'text-xs -top-6 text-blue-400' 
+                  : 'text-gray-400'
               }`}
             >
               <Mail size={16} /> 
@@ -130,7 +130,7 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('email')}
               onBlur={handleBlur}
-              className="form-input"
+              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white"
               required
             />
           </div>
@@ -139,8 +139,8 @@ const ContactForm: React.FC = () => {
             <label 
               className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'phone' || formData.phone 
-                  ? 'text-xs -top-6 text-tech-blue' 
-                  : 'text-tech-light/60'
+                  ? 'text-xs -top-6 text-blue-400' 
+                  : 'text-gray-400'
               }`}
             >
               <Phone size={16} /> 
@@ -153,7 +153,7 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('phone')}
               onBlur={handleBlur}
-              className="form-input"
+              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 outline-none focus:border-blue-400 transition-all duration-300 text-white"
               required
             />
           </div>
@@ -162,8 +162,8 @@ const ContactForm: React.FC = () => {
             <label 
               className={`absolute left-4 top-3 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'subject' || formData.subject 
-                  ? 'text-xs -top-6 text-tech-blue' 
-                  : 'text-tech-light/60'
+                  ? 'text-xs -top-6 text-blue-400' 
+                  : 'text-gray-400'
               }`}
             >
               <FileText size={16} /> 
@@ -175,7 +175,7 @@ const ContactForm: React.FC = () => {
               onChange={handleChange}
               onFocus={() => handleFocus('subject')}
               onBlur={handleBlur}
-              className="form-input min-h-[120px] resize-none pt-4"
+              className="w-full bg-black/70 border border-gray-700 rounded-md px-4 py-3 min-h-[120px] resize-none pt-4 outline-none focus:border-blue-400 transition-all duration-300 text-white"
               required
             />
           </div>
@@ -183,7 +183,7 @@ const ContactForm: React.FC = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gradient-to-r from-[#0a192f] to-[#112240] hover:from-[#112240] hover:to-[#233554] border border-tech-blue/30 hover:border-tech-blue/80 rounded-md py-3 px-4 flex items-center justify-center gap-2 text-tech-blue transition-all duration-300 group"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 rounded-md py-3 px-4 flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 group"
           >
             <span className="group-hover:translate-x-1 transition-transform duration-300">
               {submitting ? 'Sending...' : 'Send message'}
