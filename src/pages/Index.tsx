@@ -24,19 +24,6 @@ const Index: React.FC = () => {
       <div className="absolute top-24 left-24 w-1.5 h-1.5 rounded-full bg-tech-blue/20 animate-pulse-slow" style={{ animationDelay: '0.5s' }} />
       <div className="absolute top-32 right-40 w-2 h-2 rounded-full bg-tech-blue/25 animate-pulse-slow" style={{ animationDelay: '1s' }} />
       
-      {/* Header */}
-      <div className="mb-16 text-center stagger-fade-in opacity-0 animate-fade-in">
-        <div className="inline-block px-3 py-1 mb-4 text-xs font-medium text-tech-blue bg-tech-blue/10 rounded-full">
-          Connect with us
-        </div>
-        <h1 className="text-5xl font-light text-tech-white mb-4 tracking-tight">
-          Contact <span className="text-tech-blue">Form</span>
-        </h1>
-        <p className="text-tech-light max-w-md mx-auto">
-          Fill out the form below and we'll get back to you as soon as possible.
-        </p>
-      </div>
-      
       {/* Form Container */}
       <ContactForm />
       
