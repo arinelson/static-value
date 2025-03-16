@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Send, User, Mail, Phone, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -187,8 +188,8 @@ const ContactForm: React.FC = () => {
   return (
     <div className="w-full max-w-lg mx-auto animate-fade-in-up">
       <div className="bg-black/90 rounded-xl p-8 shadow-xl border border-gray-800">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="relative mt-6">
             <label 
               className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'name' || formData.name 
@@ -216,7 +217,7 @@ const ContactForm: React.FC = () => {
             )}
           </div>
           
-          <div className="relative">
+          <div className="relative mt-8">
             <label 
               className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'email' || formData.email 
@@ -244,7 +245,7 @@ const ContactForm: React.FC = () => {
             )}
           </div>
           
-          <div className="relative">
+          <div className="relative mt-8">
             <label 
               className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'phone' || formData.phone 
@@ -272,7 +273,7 @@ const ContactForm: React.FC = () => {
             )}
           </div>
           
-          <div className="relative">
+          <div className="relative mt-8">
             <label 
               className={`absolute left-4 flex items-center gap-2 transition-all duration-300 ${
                 focusedField === 'subject' || formData.subject 
@@ -302,7 +303,7 @@ const ContactForm: React.FC = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 rounded-md py-3 px-4 flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 group"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 rounded-md py-3 px-4 flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 group mt-8"
           >
             <span className="group-hover:translate-x-1 transition-transform duration-300">
               {submitting ? 'Sending...' : 'Send message'}
