@@ -59,9 +59,6 @@ const ContactForm: React.FC = () => {
   return (
     <div className="w-full max-w-lg mx-auto animate-fade-in-up">
       <div className="glass-panel rounded-xl p-8 subtle-glow">
-        <h2 className="text-tech-blue text-sm uppercase tracking-wider mb-2 opacity-80">Contact</h2>
-        <h1 className="text-3xl font-light mb-8 text-tech-white">Get in touch</h1>
-        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative">
             <label 
