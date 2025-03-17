@@ -36,7 +36,8 @@ const ContactForm: React.FC = () => {
   const [focusedField, setFocusedField] = useState<keyof FormData | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   
-  const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbz7sJKZi4PyoAsHJaA8S2YCFn-Lf4AiFgW1dXBDA2yUBLt1eQia4MeNPvo-_gtjn-zQ/exec"; // TODO: Add your Google Sheets URL here
+  // Certifique-se de substituir por sua URL do Google Apps Script
+  const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbz7sJKZi4PyoAsHJaA8S2YCFn-Lf4AiFgW1dXBDA2yUBLt1eQia4MeNPvo-_gtjn-zQ/exec";
 
   const validateEmail = (email: string) => {
     if (!email) return "Email is required";
@@ -132,37 +133,39 @@ const ContactForm: React.FC = () => {
     
     if (!validateForm()) {
       toast({
-        title: "Validation Error",
-        description: "Please correct the errors in the form",
+        title: "Erro de validação",
+        description: "Por favor, corrija os erros no formulário",
         variant: "destructive",
       });
       return;
     }
     
-    if (!GOOGLE_SHEETS_URL) {
-      console.log("Google Sheets URL not configured");
-      toast({
-        title: "Form submitted",
-        description: "Form received, but Google Sheets URL not configured yet",
-      });
-      return;
-    }
-    
     setSubmitting(true);
+    console.log("Enviando dados para:", GOOGLE_SHEETS_URL);
+    console.log("Dados a serem enviados:", formData);
     
     try {
-      await fetch(GOOGLE_SHEETS_URL, {
+      // Usar FormData para envio
+      const form = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        form.append(key, value);
+      });
+      
+      // Primeira tentativa usando JSON
+      const jsonResponse = await fetch(GOOGLE_SHEETS_URL, {
         method: 'POST',
-        mode: 'no-cors', // Required for Google Apps Script web apps
+        mode: 'no-cors', // Necessário para Google Apps Script
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
       
+      console.log("Resposta recebida");
+      
       toast({
-        title: "Form submitted successfully",
-        description: "Your data has been sent!",
+        title: "Formulário enviado com sucesso",
+        description: "Seus dados foram enviados!",
       });
       
       setFormData({
@@ -174,10 +177,10 @@ const ContactForm: React.FC = () => {
       
       setErrors({});
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Erro ao enviar formulário:', error);
       toast({
-        title: "Error submitting form",
-        description: "Please try again later",
+        title: "Erro ao enviar formulário",
+        description: "Tente novamente mais tarde",
         variant: "destructive",
       });
     } finally {
@@ -306,7 +309,7 @@ const ContactForm: React.FC = () => {
             className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 rounded-md py-3 px-4 flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 group mt-8"
           >
             <span className="group-hover:translate-x-1 transition-transform duration-300">
-              {submitting ? 'Sending...' : 'Send message'}
+              {submitting ? 'Enviando...' : 'Enviar mensagem'}
             </span>
             <Send size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
           </button>
