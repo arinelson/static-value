@@ -37,26 +37,26 @@ const ContactForm: React.FC = () => {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   
   const validateEmail = (email: string) => {
-    if (!email) return "Email is required";
+    if (!email) return "Email é obrigatório";
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) return "Invalid email format";
     
     const domain = email.split('@')[1];
     if (!VALID_EMAIL_DOMAINS.includes(domain)) {
-      return `Only emails from these domains are accepted: ${VALID_EMAIL_DOMAINS.join(', ')}`;
+      return `Somente e-mails desses domínios são aceitos: ${VALID_EMAIL_DOMAINS.join(', ')}`;
     }
     
     return "";
   };
 
   const validatePhone = (phone: string) => {
-    if (!phone) return "Phone number is required";
+    if (!phone) return "Número de telefone é obrigatório";
     
     const numericPhone = phone.replace(/\D/g, '');
     
     if (numericPhone.length !== 11) {
-      return "Phone must have 11 digits: (DD) 9 XXXX-XXXX";
+      return "O telefone deve ter 11 dígitos: (DD) 9 XXXX-XXXX";
     }
     
     return "";
@@ -95,7 +95,7 @@ const ContactForm: React.FC = () => {
         const emailError = validateEmail(value);
         setErrors(prev => ({ ...prev, [name]: emailError }));
       } else {
-        setErrors(prev => ({ ...prev, [name]: value ? "" : `${name} is required` }));
+        setErrors(prev => ({ ...prev, [name]: value ? "" : `${name} é obrigatório` }));
       }
     }
   };
@@ -111,7 +111,7 @@ const ContactForm: React.FC = () => {
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
     
-    if (!formData.name) newErrors.name = "Name is required";
+    if (!formData.name) newErrors.name = "Nome é obrigatório";
     
     const emailError = validateEmail(formData.email);
     if (emailError) newErrors.email = emailError;
@@ -119,7 +119,7 @@ const ContactForm: React.FC = () => {
     const phoneError = validatePhone(formData.phone);
     if (phoneError) newErrors.phone = phoneError;
     
-    if (!formData.subject) newErrors.subject = "Subject is required";
+    if (!formData.subject) newErrors.subject = "Assunto é obrigatório";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -196,7 +196,7 @@ const ContactForm: React.FC = () => {
               }`}
             >
               <User size={16} /> 
-              <span>Name</span>
+              <span>Nome</span>
             </label>
             <input
               type="text"
@@ -252,7 +252,7 @@ const ContactForm: React.FC = () => {
               }`}
             >
               <Phone size={16} /> 
-              <span>Phone</span>
+              <span>WhatsApp</span>
             </label>
             <input
               type="tel"
@@ -280,7 +280,7 @@ const ContactForm: React.FC = () => {
               }`}
             >
               <FileText size={16} /> 
-              <span>Subject</span>
+              <span>Assunto</span>
             </label>
             <textarea
               name="subject"
