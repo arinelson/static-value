@@ -36,7 +36,7 @@ const ContactForm: React.FC = () => {
   const [focusedField, setFocusedField] = useState<keyof FormData | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   
-  const GOOGLE_SHEETS_URL = "https://github.com/arinelson/futuristic-form-oasis-31"; // TODO: Add your Google Sheets URL here
+  const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbz7sJKZi4PyoAsHJaA8S2YCFn-Lf4AiFgW1dXBDA2yUBLt1eQia4MeNPvo-_gtjn-zQ/exec"; // TODO: Add your Google Sheets URL here
 
   const validateEmail = (email: string) => {
     if (!email) return "Email is required";
