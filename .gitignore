@@ -1,3 +1,5 @@
+src/config/apiConfig.ts
+
 # Logs
 logs
 *.log
