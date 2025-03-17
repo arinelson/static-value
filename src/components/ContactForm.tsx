@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { Send, User, Mail, Phone, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { GOOGLE_SHEETS_URL } from '@/config/apiConfig';
 
 interface FormData {
   name: string;
@@ -36,9 +36,6 @@ const ContactForm: React.FC = () => {
   const [focusedField, setFocusedField] = useState<keyof FormData | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   
-  // Certifique-se de substituir por sua URL do Google Apps Script
-  const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbz7sJKZi4PyoAsHJaA8S2YCFn-Lf4AiFgW1dXBDA2yUBLt1eQia4MeNPvo-_gtjn-zQ/exec";
-
   const validateEmail = (email: string) => {
     if (!email) return "Email is required";
     
@@ -145,16 +142,14 @@ const ContactForm: React.FC = () => {
     console.log("Dados a serem enviados:", formData);
     
     try {
-      // Usar FormData para envio
       const form = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         form.append(key, value);
       });
       
-      // Primeira tentativa usando JSON
       const jsonResponse = await fetch(GOOGLE_SHEETS_URL, {
         method: 'POST',
-        mode: 'no-cors', // Necessário para Google Apps Script
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json',
         },
