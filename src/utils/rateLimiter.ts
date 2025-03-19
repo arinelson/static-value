@@ -4,8 +4,8 @@ interface RateLimitEntry {
   blockedUntil: number | null;
 }
 
-// In a real app, this would be stored in a database
-const rateLimitStore: Record<string, RateLimitEntry> = {};
+// Export const for consistent keys
+export const RATE_LIMIT_STORAGE_KEY = 'rate_limit_data';
 
 // Get user's fingerprint (in a real app, you'd use a more robust solution)
 export const getUserFingerprint = (): string => {
@@ -22,12 +22,40 @@ export const getUserFingerprint = (): string => {
   return fingerprint;
 };
 
+// Load rate limit data from localStorage
+const loadRateLimitStore = (): Record<string, RateLimitEntry> => {
+  try {
+    const storedData = localStorage.getItem(RATE_LIMIT_STORAGE_KEY);
+    if (storedData) {
+      return JSON.parse(storedData);
+    }
+  } catch (error) {
+    console.error('Error loading rate limit data:', error);
+  }
+  return {};
+};
+
+// Save rate limit data to localStorage
+const saveRateLimitStore = (data: Record<string, RateLimitEntry>): void => {
+  try {
+    localStorage.setItem(RATE_LIMIT_STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving rate limit data:', error);
+  }
+};
+
+// Get rate limit store with persistence
+const getRateLimitStore = (): Record<string, RateLimitEntry> => {
+  return loadRateLimitStore();
+};
+
 export const checkRateLimit = (): { 
   canSubmit: boolean; 
   waitTime: number; 
   submissionsLeft: number;
   isHourBlock: boolean;
 } => {
+  const rateLimitStore = getRateLimitStore();
   const fingerprint = getUserFingerprint();
   const now = Date.now();
   const COOLDOWN_PERIOD = 30 * 1000; // 30 seconds
@@ -40,6 +68,7 @@ export const checkRateLimit = (): {
       timestamps: [],
       blockedUntil: null
     };
+    saveRateLimitStore(rateLimitStore);
   }
   
   const userLimit = rateLimitStore[fingerprint];
@@ -58,16 +87,19 @@ export const checkRateLimit = (): {
   if (userLimit.blockedUntil && userLimit.blockedUntil <= now) {
     userLimit.blockedUntil = null;
     userLimit.timestamps = [];
+    saveRateLimitStore(rateLimitStore);
   }
   
   // Remove timestamps older than 1 hour (cleanup)
   userLimit.timestamps = userLimit.timestamps.filter(
     time => now - time < HOUR_BLOCK_PERIOD
   );
+  saveRateLimitStore(rateLimitStore);
   
   // Check if reached maximum submissions
   if (userLimit.timestamps.length >= MAX_SUBMISSIONS) {
     userLimit.blockedUntil = now + HOUR_BLOCK_PERIOD;
+    saveRateLimitStore(rateLimitStore);
     return { 
       canSubmit: false, 
       waitTime: HOUR_BLOCK_PERIOD / 1000,
@@ -96,6 +128,7 @@ export const checkRateLimit = (): {
 };
 
 export const recordSubmission = (): void => {
+  const rateLimitStore = getRateLimitStore();
   const fingerprint = getUserFingerprint();
   
   if (!rateLimitStore[fingerprint]) {
@@ -106,4 +139,5 @@ export const recordSubmission = (): void => {
   }
   
   rateLimitStore[fingerprint].timestamps.push(Date.now());
+  saveRateLimitStore(rateLimitStore);
 };
