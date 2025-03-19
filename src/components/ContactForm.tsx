@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { Send, User, Mail, Phone, FileText } from 'lucide-react';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { Send, User, Mail, Phone, FileText, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { GOOGLE_SHEETS_URL } from '@/config/apiConfig';
+import { checkRateLimit, recordSubmission } from '@/utils/rateLimiter';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FormData {
   name: string;
@@ -35,6 +38,69 @@ const ContactForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState<keyof FormData | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [countdown, setCountdown] = useState<number>(0);
+  const [submissionsLeft, setSubmissionsLeft] = useState<number>(5);
+  const [isHourBlock, setIsHourBlock] = useState<boolean>(false);
+  const timerRef = useRef<number | null>(null);
+  
+  // Check rate limit on component mount
+  useEffect(() => {
+    const checkLimit = () => {
+      const { canSubmit, waitTime, submissionsLeft, isHourBlock } = checkRateLimit();
+      setSubmissionsLeft(submissionsLeft);
+      setIsHourBlock(isHourBlock);
+      
+      if (!canSubmit) {
+        setCountdown(waitTime);
+        
+        if (timerRef.current) {
+          window.clearInterval(timerRef.current);
+        }
+        
+        timerRef.current = window.setInterval(() => {
+          setCountdown(prevCount => {
+            if (prevCount <= 1) {
+              if (timerRef.current) {
+                window.clearInterval(timerRef.current);
+                timerRef.current = null;
+              }
+              
+              // Recheck limits after countdown ends
+              const newLimit = checkRateLimit();
+              setSubmissionsLeft(newLimit.submissionsLeft);
+              setIsHourBlock(newLimit.isHourBlock);
+              
+              return 0;
+            }
+            return prevCount - 1;
+          });
+        }, 1000);
+      }
+    };
+    
+    checkLimit();
+    
+    // Cleanup interval on unmount
+    return () => {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+  
+  // Format countdown display
+  const formatCountdown = (seconds: number): string => {
+    if (seconds < 60) {
+      return `${seconds} segundos`;
+    } else if (seconds < 3600) {
+      return `${Math.floor(seconds / 60)} minutos e ${seconds % 60} segundos`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+      return `${hours} hora${hours > 1 ? 's' : ''}, ${minutes} minuto${minutes > 1 ? 's' : ''} e ${remainingSeconds} segundo${remainingSeconds > 1 ? 's' : ''}`;
+    }
+  };
   
   const validateEmail = (email: string) => {
     if (!email) return "Email é obrigatório";
@@ -128,6 +194,45 @@ const ContactForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check if user can submit
+    const { canSubmit, waitTime, submissionsLeft, isHourBlock } = checkRateLimit();
+    setSubmissionsLeft(submissionsLeft);
+    setIsHourBlock(isHourBlock);
+    
+    if (!canSubmit) {
+      setCountdown(waitTime);
+      
+      // Start countdown timer
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+      }
+      
+      timerRef.current = window.setInterval(() => {
+        setCountdown(prevCount => {
+          if (prevCount <= 1) {
+            if (timerRef.current) {
+              window.clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            return 0;
+          }
+          return prevCount - 1;
+        });
+      }, 1000);
+      
+      const message = isHourBlock
+        ? `Você atingiu o limite de envios. Tente novamente em ${formatCountdown(waitTime)}.`
+        : `Aguarde ${formatCountdown(waitTime)} antes de enviar outra mensagem.`;
+      
+      toast({
+        title: "Limite de envio",
+        description: message,
+        variant: "destructive",
+      });
+      
+      return;
+    }
+    
     if (!validateForm()) {
       toast({
         title: "Erro de validação",
@@ -158,6 +263,35 @@ const ContactForm: React.FC = () => {
       
       console.log("Resposta recebida");
       
+      // Record successful submission
+      recordSubmission();
+      
+      // Update countdown and submissions left
+      const newLimitStatus = checkRateLimit();
+      setSubmissionsLeft(newLimitStatus.submissionsLeft);
+      
+      if (!newLimitStatus.canSubmit) {
+        setCountdown(newLimitStatus.waitTime);
+        
+        // Start countdown timer
+        if (timerRef.current) {
+          window.clearInterval(timerRef.current);
+        }
+        
+        timerRef.current = window.setInterval(() => {
+          setCountdown(prevCount => {
+            if (prevCount <= 1) {
+              if (timerRef.current) {
+                window.clearInterval(timerRef.current);
+                timerRef.current = null;
+              }
+              return 0;
+            }
+            return prevCount - 1;
+          });
+        }, 1000);
+      }
+      
       toast({
         title: "Formulário enviado com sucesso",
         description: "Seus dados foram enviados!",
@@ -186,6 +320,26 @@ const ContactForm: React.FC = () => {
   return (
     <div className="w-full max-w-lg mx-auto animate-fade-in-up">
       <div className="bg-black/90 rounded-xl p-8 shadow-xl border border-gray-800">
+        {countdown > 0 && (
+          <Alert className="mb-4 bg-yellow-900/30 border-yellow-600 text-yellow-200">
+            <AlertTriangle className="h-5 w-5 text-yellow-400" />
+            <AlertDescription className="ml-2">
+              {isHourBlock 
+                ? `Você atingiu o limite de envios. Tente novamente em ${formatCountdown(countdown)}.`
+                : `Aguarde ${formatCountdown(countdown)} antes de enviar outra mensagem.`
+              }
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {!isHourBlock && submissionsLeft < 5 && (
+          <Alert className="mb-4 bg-blue-900/30 border-blue-600 text-blue-200">
+            <AlertDescription>
+              Você tem {submissionsLeft} {submissionsLeft === 1 ? 'envio restante' : 'envios restantes'} antes do limite de hora.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="relative mt-6">
             <label 
@@ -300,11 +454,15 @@ const ContactForm: React.FC = () => {
           
           <button
             type="submit"
-            disabled={submitting}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 rounded-md py-3 px-4 flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 group mt-8"
+            disabled={submitting || countdown > 0}
+            className={`w-full ${
+              countdown > 0 
+                ? 'bg-gray-700 cursor-not-allowed opacity-70' 
+                : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300'
+            } rounded-md py-3 px-4 flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 group mt-8`}
           >
             <span className="group-hover:translate-x-1 transition-transform duration-300">
-              {submitting ? 'Enviando...' : 'Enviar mensagem'}
+              {submitting ? 'Enviando...' : countdown > 0 ? `Aguarde ${formatCountdown(countdown)}` : 'Enviar mensagem'}
             </span>
             <Send size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
           </button>
